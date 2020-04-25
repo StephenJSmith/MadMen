@@ -1,10 +1,8 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Core.Entities;
-using Infrastructure.Data;
+using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -12,24 +10,26 @@ namespace API.Controllers
   [Route("api/[controller]")]
   public class JobsController : ControllerBase
   {
-    private readonly MadMenContext _context;
-    public JobsController(MadMenContext context)
+    private readonly IJobRepository _repo;
+    public JobsController(IJobRepository repo)
     {
-      _context = context;
+      _repo = repo;
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Job>>> GetJobs() {
-      var jobs = await _context.Jobs.ToListAsync();
+    public async Task<ActionResult<List<Job>>> GetJobs()
+    {
+      var jobs = await _repo.GetJobs();
 
-        return Ok(jobs);
+      return Ok(jobs);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Job>> GetJob(int id) {
-      var job = await _context.Jobs.FindAsync(id);
+    public async Task<ActionResult<Job>> GetJob(int id)
+    {
+      var job = await _repo.GetJobById(id);
 
-        return Ok(job);
+      return Ok(job);
     }
   }
 }
