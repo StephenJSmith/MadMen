@@ -1,18 +1,18 @@
 using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using API.Dtos;
+using API.Errors;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
 using Core.Specifications;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-  [ApiController]
-  [Route("api/[controller]")]
-  public class JobsController : ControllerBase
+  public class JobsController : BaseApiController
   {
     private readonly IGenericRepository<Job> _jobsRepo;
     private readonly IMapper _mapper;
@@ -27,26 +27,26 @@ namespace API.Controllers
     {
       var spec = new JobsWithCategoryStateLocationsProductsSpecification();
       var jobs = await _jobsRepo.ListAsync(spec);
-      var dtos = jobs.Select(job => new JobToReturnDto
-      {
-        Id = job.Id,
-        Name = job.Name,
-        Description = job.Description,
-        JobCategory = job.JobCategory.Name,
-        JobState = job.JobState.Name,
-        IsAutoJobStateId = job.IsAutoJobStateId,
-        Location = job.Location.Name,
-        Product = job.Product.Name
-      });
+      var dtos = _mapper.Map<IReadOnlyList<Job>, IReadOnlyList<JobToReturnDto>>(jobs);
 
       return Ok(dtos);
     }
 
     [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<JobToReturnDto>> GetJob(int id)
     {
       var spec = new JobsWithCategoryStateLocationsProductsSpecification(id);
       var job = await _jobsRepo.GetEntityWithSpec(spec);
+      if (job == null)
+      {
+        var notFoundCode = (int)HttpStatusCode.NotFound;
+        var apiResponse = new ApiResponse(notFoundCode);
+
+        return NotFound(apiResponse);
+      }
+
       var dto = _mapper.Map<Job, JobToReturnDto>(job);
 
       return Ok(dto);
