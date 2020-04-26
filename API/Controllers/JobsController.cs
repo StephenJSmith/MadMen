@@ -3,9 +3,11 @@ using System.Net;
 using System.Threading.Tasks;
 using API.Dtos;
 using API.Errors;
+using API.Helpers;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
+using Core.Specfications;
 using Core.Specifications;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,13 +25,22 @@ namespace API.Controllers
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<JobToReturnDto>>> GetJobs()
+    public async Task<ActionResult<Pagination<JobToReturnDto>>> GetJobs(
+      [FromQuery]JobSpecParams jobParams)
     {
-      var spec = new JobsWithCategoryStateLocationsProductsSpecification();
+      var countSpec = new JobWithFiltersForCountSpecification(jobParams);
+      var totalItems = await _jobsRepo.Count(countSpec);
+
+      var spec = new JobsWithCategoryStateLocationsProductsSpecification(jobParams);
       var jobs = await _jobsRepo.ListAsync(spec);
       var dtos = _mapper.Map<IReadOnlyList<Job>, IReadOnlyList<JobToReturnDto>>(jobs);
+      var pagination = new Pagination<JobToReturnDto>(
+        jobParams.PageNumber,
+        jobParams.PageSize,
+        totalItems,
+        dtos);
 
-      return Ok(dtos);
+      return Ok(pagination);
     }
 
     [HttpGet("{id}")]

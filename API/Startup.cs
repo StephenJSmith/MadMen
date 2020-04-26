@@ -20,7 +20,6 @@ namespace API
       _config = config;
     }
 
-    // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
       services.AddAutoMapper(typeof(MappingProfiles));
@@ -29,9 +28,16 @@ namespace API
           x.UseSqlServer(_config.GetConnectionString("DefaultConnection")));
       services.AddApplicationService();
       services.AddSwaggerDocumentation();
+      services.AddCors(option => {
+        option.AddPolicy("CorsPolicy", policy => {
+          policy
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .WithOrigins(_config["ClientUrl"]);
+        });
+      });
     }
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
       app.UseMiddleware<ExceptionMiddleware>();
@@ -41,6 +47,8 @@ namespace API
 
       app.UseRouting();
       app.UseStaticFiles();
+
+      app.UseCors("CorsPolicy");
 
       app.UseAuthorization();
 
