@@ -49,5 +49,12 @@ namespace Infrastructure.Data
 
       return queryable;
     }
+
+    public async Task<int> Count(ISpecification<T> spec)
+    {
+      var count = await ApplySpecification(spec).CountAsync();
+
+      return count;
+    }
   }
 }
