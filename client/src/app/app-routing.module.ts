@@ -6,10 +6,10 @@ import { HomeComponent } from './home/home.component';
 
 
 const routes: Routes = [
-  {path: '', component: HomeComponent},
-  {path: 'server-error', component: ServerErrorComponent},
-  {path: 'not-found', component: NotFoundComponent},
-  {path: '**', redirectTo: '', pathMatch: 'full'},
+  {path: '', component: HomeComponent, data: {breadcrumb: 'Home'}},
+  {path: 'server-error', component: ServerErrorComponent, data: {breadcrumb: 'Server Error'}},
+  {path: 'not-found', component: NotFoundComponent, data: {breadcrumb: 'Not Found'}},
+  {path: '**', redirectTo: 'not-found', pathMatch: 'full'},
 ];
 
 @NgModule({
