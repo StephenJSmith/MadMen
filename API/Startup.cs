@@ -3,6 +3,7 @@ using API.Helpers;
 using API.Middleware;
 using AutoMapper;
 using Infrastructure.Data;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,12 @@ namespace API
       services.AddControllers();
       services.AddDbContext<MadMenContext>(x =>
           x.UseSqlServer(_config.GetConnectionString("DefaultConnection")));
+        
+      services.AddDbContext<AppIdentityDbContext>(x => 
+          x.UseSqlServer(_config.GetConnectionString("IdentityConnection")));
+          
       services.AddApplicationService();
+      services.AddIdentityServices(_config);
       services.AddSwaggerDocumentation();
       services.AddCors(option => {
         option.AddPolicy("CorsPolicy", policy => {
@@ -50,6 +56,7 @@ namespace API
 
       app.UseCors("CorsPolicy");
 
+      app.UseAuthentication();
       app.UseAuthorization();
 
       app.UseSwaggerDocumentation();
