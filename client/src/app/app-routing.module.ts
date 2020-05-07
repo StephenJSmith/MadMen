@@ -9,6 +9,8 @@ const routes: Routes = [
   {path: '', component: HomeComponent, data: {breadcrumb: 'Home'}},
   {path: 'server-error', component: ServerErrorComponent, data: {breadcrumb: 'Server Error'}},
   {path: 'not-found', component: NotFoundComponent, data: {breadcrumb: 'Not Found'}},
+  {path: 'account', loadChildren: () => import('./account/account.module').then(mod => mod.AccountModule),
+    data: {breadcrumb: {skip: true}}},
   {path: '**', redirectTo: 'not-found', pathMatch: 'full'},
 ];
 
